@@ -17,7 +17,7 @@
 ### :page_with_curl:编程语言
 
 - [Bash](languages/bash.sh)
-- [Bash-grep](languages/linux里grep和egrep,fgrep的区别.doc)
+- [Bash-grep](languages/linux里grep和egrep,fgrep的区别.txt)
 - [Linux-systemTime](languages/Centos系统时间.txt)
 - [Linux-version/hardware/environment/threads/ports](languages/linux版本-硬件信息.doc)
 - [Linux-mount](languages/linux+磁盘挂载及查看磁盘.doc)
