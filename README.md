@@ -17,9 +17,11 @@
 ### :page_with_curl:编程语言
 
 - [Bash](languages/bash.sh)
+- [Bash](languages/Centos系统时间.txt)
 - [Go](languages/golang.go)
 - [Php](languages/php.php)
 - [VimScript](languages/vimscript.md)
+
 
 ### :wrench:开发工具
 
