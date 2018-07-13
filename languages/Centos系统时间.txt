@@ -1,0 +1,185 @@
+Centos如何永久修改系统时间
+在服务器上，时间的精确是非常重要的，通常情况下，使用时间修改命令`date -s ‘2015-8-31 13:15:00’即可立即生效，但这只是暂时的修改时间，机器重启之后系统时间依旧没有改变，原因是在CentOS中，时间分为系统时间和硬件时间，更改其一无法奏效的，必须两者都修改。好，现在直接给出解决办法。
+
+date //本年本地时间
+hwclock -r //查看硬件时间
+hwclock --set --date '2015-8-31 13:24:00' //此处填上你想修改的硬件时间。
+hwclock --hctosys //设置硬件时间与系统时间同步。
+hwclock -w //保存时间
+init 6 //快速重启
+centos 7 修改系统时间
+我们一般使用“date -s”命令来修改系统时间。比如将系统时间设定成1996年6月10日的命令如下。
+
+#date -s 06/10/96
+
+将系统时间设定成下午1点12分0秒的命令如下。
+
+#date -s 13:12:00
+
+一、设置时区 
+setup 
+
+选择Timezone configuration 
+
+选择Asia/Shanghai 
+
+空格键勾选上System clock uses UTC 
+
+就OK了。 
+
+方法二：使用tzselect工具 
+tzselect 
+
+选择亚洲Asia 
+5 
+
+选择国家China 
+9 
+
+选择地区central China 
+3 
+
+确认选择Yes 
+1 
+
+设置好tzselect后，一定要重写/etc/localtime 
+rm/etc/localtime 
+
+ln -sf/usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
+
+方法三：直接修改/etc/sysconfig/clock文件 
+vi/etc/sysconfig/clock 
+
+ZONE="Asia/Shanghai" 
+UTC=true 
+ARC=false 
+
+重写/etc/localtime 
+rm/etc/localtime 
+
+ln -sf/usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
+
+二、重启系统使时区生效 
+reboot 
+
+三、更新时间 
+更新系统时间 
+ntpdatecn.pool.ntp.org 
+
+更新硬件时间 
+hwclock--systohc 
+
+四、crontab定时较对时间 
+设置crontab定时较对时间 
+crontab -e 
+
+30 1 * * * ntpdate cn.pool.ntp.org ;hwclock --systohc 
+
+PS： 
+ntpdate命令安装 
+yum -y installntp 
+
+setup工具安装 
+yum -y installsetuptool 
+
+crontabs安装 
+yum -y install gcc gcc-c++autoconf vixie-cron crontabs
+
+
+
+转]解决服务器重启后，时间自动变更的问题
+
+
+
+在项目中，有时候会发现服务器在每次重启后，时间会自动的变更，以至带来很多的麻烦。（例如日志记录混乱，OA系统登记信息错误等）导致这样的问题基本上有两个： 
+1）服务器硬件造成的，如电池电量不够； 
+2）系统问题，通常是因为时区错误。 
+要解决该问题，首先要知道的就是Linux系统中时间的概念： 
+1）Linux系统中，系统时间和硬件时间是独立的 
+系统时间是表示系统内运行的时间，硬件时间是指硬件设备中，如BIOS的时间。 
+2）系统时间和硬件时间的关系 
+系统时间由硬件时间和系统时区进行设置。系统在启动的时候，会从硬件设备中读取硬件时间，并根据系统时区进行修改，然后写入到系统时间内。同样，系统关闭时，也会读取系统时间，然后写入硬件时间。 
+由于硬件造成的问题，请联系硬件供应商。下面我们来谈谈系统上的解决方法： 
+1、涉及到的文件有： 
+
+引用
+/etc/localtime－－本地时间的文件（二进制文件） 
+/etc/sysconfig/clock－－系统时间的配置文件 
+/etc/timezone－－系统时区文件 
+以及一个目录： 
+/usr/share/zoneinfo－－系统可使用的本地时间文件
+
+
+2、使用到的命令 
+/bin/date－－查看系统时间 
+/sbin/hwclock－－查看硬件或系统时间，并可修改硬件时间 
+3、范例 
+让我们以一个实际例子为例： 
+系统：红旗 DC Server 5.0 for x86 
+通常，由于我们所在的时区是GMT +8（中国），所以，出现问题会发现这样的情况： 
+
+引用
+
+# date 042519302006 
+Tue Apr 25 19:31:00 CST 2006 
+# hwclock -r 
+Tue Apr 25 11:31:36 2006 -0.432139 seconds
+也就是，系统时间比硬件时间增加了8小时。 
+首先，查看并修改时区配置： 
+
+# cat /etc/timezone 
+Asia/Beijing
+接下来，查看系统时间的配置文件 
+
+# cat /etc/sysconfig/clock 
+ZONE="Asia/Beijing" 
+UTC=false 
+ARC=false
+要保证上述的Zone环境配置是对应的。然后修改本地时间文件： 
+
+# cd /usr/share/zoneinfo/Asia/ 
+# cp Beijing /etc/localtime
+拷贝正确的本地时间文件（或链接） 
+最后，把硬件时间重新设置为系统时间，然后重新启动，以生效： 
+
+# hwclock --hctosys
+4、例外 
+在部分系统上，如AsinaUX1.0。会由于系统本身采用的是UTC时间，若我们采用上述的方式修改系统时间，会发现这样的现象： 
+◎系统启动过程显示的localtime时间是正确的，但进入系统后，用date命令看到的时间恰好又多了8个小时 
+这样，我们就只能修改系统时间的配置文件，把UTC时间激活 
+
+引用
+# cat /etc/sysconfig/clock 
+ZONE="Asia/Beijing" 
+UTC=true 
+ARC=false 
+# hwclock --hctosys
+重启即可。 
+5、其他 
+常用的配置时间命令还有： 
+
+# date 042511482006
+格式：date 月日时分年 
+（该设置和BSD上有所不同） 
+
+# hwclock -r 或 hwclock --show
+查看硬件时间 
+
+# hwclock --systohc 或 hwclock -w
+把系统时间写入硬件时间 
+
+# hwclock --hctosys 或 hwclock -s
+就是把硬件时间写成系统时间 
+6、服务 
+最近发现，系统中的某些服务会对CPU频率进行调整，由此也会导致系统时间出现问题。典型的就是红旗DC5.0上的cpuspeed服务，建议在某些情况下，可以把其关闭： 
+
+
+service cpuspeed stop 
+chkconfig cpuspeed off
+
+※系统时间对于系统的稳定很重要，甚至会影响到HA等应用服务，一旦遇到问题，需要多分析问题的原因，直到解决为止！ 
+
+※附： 
+UTC时间和GMT时间，这是一个很多天文爱好者争论不休的问题。我们不作深究。只要知道这样： 
+UTC 也就是 Coordinated Universal Time (协和标准时间)，是利用这种 Atomic Clock为基准所定义出来的正确时间。UTC标准时间是以 GMT 这个时区为主的。所以本地时间与 UTC 时间的时差就是本地时间与 GMT时间的时差。转载：http://hi.baidu.com/zj8la8la/blog/item/fbaa941797f0675c21a4e958
+.html
