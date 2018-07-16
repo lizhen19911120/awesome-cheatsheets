@@ -1,0 +1,8 @@
+创建关系（表）:
+create table r
+      (A1 D1 [not null],
+       A2 D2,
+       ...,
+       An Dn,
+       primary key(),
+       foreign key() references);
