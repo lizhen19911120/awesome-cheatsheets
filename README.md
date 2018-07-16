@@ -25,8 +25,8 @@
 - [Php](languages/php.php)
 - [VimScript](languages/vimscript.md)
 
-### :datasource:数据库
-- [SQL](languages\sql.txt)
+### :wrench:数据库
+- [SQL](languages/sql.txt)
 
 ### :wrench:开发工具
 
